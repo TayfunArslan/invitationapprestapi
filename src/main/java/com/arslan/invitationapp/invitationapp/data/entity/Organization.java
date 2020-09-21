@@ -15,18 +15,6 @@ public class Organization extends BaseEntity {
     @Column(name = "created_user_id")
     private int createdUserId;
 
-    @ManyToMany
-    @JoinTable(name = "OrganizationGuest")
-    private Set<Guest> guests;
-
-    public Set<Guest> getGuests() {
-        return guests;
-    }
-
-    public void setGuests(Set<Guest> guests) {
-        this.guests = guests;
-    }
-
     public String getName() {
         return name;
     }
