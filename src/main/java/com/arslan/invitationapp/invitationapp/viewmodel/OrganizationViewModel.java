@@ -1,16 +1,18 @@
 package com.arslan.invitationapp.invitationapp.viewmodel;
 
+import com.arslan.invitationapp.invitationapp.data.entity.User;
+
 public class OrganizationViewModel {
     private int id;
     private String name;
-    private String createdUserId;
+    private User createdUser;
 
     public OrganizationViewModel() {}
 
-    public OrganizationViewModel(int id, String name, String createdUserId) {
+    public OrganizationViewModel(int id, String name, User createdUser) {
         this.id = id;
         this.name = name;
-        this.createdUserId = createdUserId;
+        this.createdUser = createdUser;
     }
 
     public int getId() {
@@ -29,11 +31,11 @@ public class OrganizationViewModel {
         this.name = name;
     }
 
-    public String getCreatedUserId() {
-        return createdUserId;
+    public User getCreatedUser() {
+        return createdUser;
     }
 
-    public void setCreatedUserId(String createdUserId) {
-        this.createdUserId = createdUserId;
+    public void setCreatedUser(int createdUserId) {
+        this.createdUser = createdUser;
     }
 }

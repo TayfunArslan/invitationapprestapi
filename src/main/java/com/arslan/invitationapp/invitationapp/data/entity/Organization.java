@@ -1,7 +1,6 @@
 package com.arslan.invitationapp.invitationapp.data.entity;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "Organizations")
@@ -12,8 +11,9 @@ public class Organization extends BaseEntity {
     @Column(name = "code")
     private String code;
 
-    @Column(name = "created_user_id")
-    private int createdUserId;
+    @OneToOne
+    @JoinColumn(name = "created_user_id")
+    private User createdUser;
 
     public String getName() {
         return name;
@@ -31,11 +31,11 @@ public class Organization extends BaseEntity {
         this.code = code;
     }
 
-    public int getCreatedUserId() {
-        return createdUserId;
+    public User getCreatedUserId() {
+        return createdUser;
     }
 
-    public void setCreatedUserId(int createdUserId) {
-        this.createdUserId = createdUserId;
+    public void setCreatedUser(User createdUser) {
+        this.createdUser = createdUser;
     }
 }

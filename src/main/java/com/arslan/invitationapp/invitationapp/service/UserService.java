@@ -1,10 +1,14 @@
 package com.arslan.invitationapp.invitationapp.service;
 
+import com.arslan.invitationapp.invitationapp.data.entity.User;
 import com.arslan.invitationapp.invitationapp.data.repository.IUserRepository;
+import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
 import com.arslan.invitationapp.invitationapp.mapper.IMapper;
 import com.arslan.invitationapp.invitationapp.service.Interface.IUserService;
 import com.arslan.invitationapp.invitationapp.viewmodel.UserViewModel;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 public class UserService  implements IUserService {
@@ -17,11 +21,15 @@ public class UserService  implements IUserService {
     }
 
     @Override
-    public ServiceResult<UserViewModel> setCoOwner(UserViewModel coOwner) {
+    public ServiceResult<UserViewModel> AddUser(UserViewModel userViewModel) {
         var serviceResult = new ServiceResult<UserViewModel>();
 
         try {
-            var user = m_userRepository.save(m_mapper.userViewModelToUser(coOwner));
+            userViewModel.setActive(true);
+            userViewModel.setDeleted(false);
+            userViewModel.setCreatedDatetime(LocalDate.now());
+
+            var user = m_userRepository.save(m_mapper.userViewModelToUser(userViewModel));
 
             serviceResult.setData(m_mapper.userToUserViewModel(user));
             serviceResult.setResponseStatus(ResponseStatus.OK);
@@ -35,12 +43,14 @@ public class UserService  implements IUserService {
     }
 
     @Override
-    public ServiceResult<Boolean> removeCoOwner(long userId) {
+    public ServiceResult<Boolean> RemoveUser(long userId) {
         var serviceResult = new ServiceResult<Boolean>();
 
         try{
             var user = m_userRepository.findById(userId);
-            user.ifPresent(u -> m_userRepository.delete(u));
+
+            if(user.isEmpty())
+                throw new Exception("User not found");
 
             serviceResult.setData(true);
             serviceResult.setResponseStatus(ResponseStatus.OK);

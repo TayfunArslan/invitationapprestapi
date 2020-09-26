@@ -1,27 +1,29 @@
 package com.arslan.invitationapp.invitationapp.viewmodel;
 
+import java.time.LocalDate;
+
 public class UserViewModel {
     private int id;
     private String name;
     private String surname;
     private String email;
     private String phone;
-    private int invitingUserId;
-    private boolean isMailSent;
-    private boolean isCalled;
+    private LocalDate createdDatetime;
+    private boolean isActive;
+    private boolean isDeleted;
 
     public UserViewModel() {
     }
 
-    public UserViewModel(int id, String name, String surname, String email, String phone, int invitingUserId, boolean isMailSent, boolean isCalled) {
+    public UserViewModel(int id, String name, String surname, String email, String phone, LocalDate createdDatetime, boolean isActive, boolean isDeleted) {
         this.id = id;
         this.name = name;
         this.surname = surname;
         this.email = email;
         this.phone = phone;
-        this.invitingUserId = invitingUserId;
-        this.isMailSent = isMailSent;
-        this.isCalled = isCalled;
+        this.createdDatetime = createdDatetime;
+        this.isActive = isActive;
+        this.isDeleted = isDeleted;
     }
 
     public int getId() {
@@ -64,27 +66,27 @@ public class UserViewModel {
         this.phone = phone;
     }
 
-    public int getInvitingUserId() {
-        return invitingUserId;
+    public LocalDate getCreatedDatetime() {
+        return createdDatetime;
     }
 
-    public void setInvitingUserId(int invitingUserId) {
-        this.invitingUserId = invitingUserId;
+    public void setCreatedDatetime(LocalDate createdDatetime) {
+        this.createdDatetime = createdDatetime;
     }
 
-    public boolean isMailSent() {
-        return isMailSent;
+    public boolean isActive() {
+        return isActive;
     }
 
-    public void setMailSent(boolean mailSent) {
-        isMailSent = mailSent;
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
-    public boolean isCalled() {
-        return isCalled;
+    public boolean isDeleted() {
+        return isDeleted;
     }
 
-    public void setCalled(boolean called) {
-        isCalled = called;
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
     }
 }

@@ -1,11 +1,16 @@
 package com.arslan.invitationapp.invitationapp.data.entity;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @Table(name = "Guests")
 public class Guest extends BaseEntity{
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "surname", nullable = false)
+    private String surname;
+
     @Column(name = "is_called")
     private boolean isCalled;
 

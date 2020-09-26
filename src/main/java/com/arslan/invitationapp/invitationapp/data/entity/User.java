@@ -3,6 +3,7 @@ package com.arslan.invitationapp.invitationapp.data.entity;
 import com.arslan.invitationapp.invitationapp.viewmodel.GuestViewModel;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -17,14 +18,11 @@ public class User extends BaseEntity {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "phone")
+    @Column(name = "phone", nullable = false)
     private String phone;
 
-    @OneToOne
-    private Role role;
-
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Guest> guests;
+    private List<Guest> guests;
 
     public String getPhone() {
         return phone;
@@ -34,20 +32,12 @@ public class User extends BaseEntity {
         this.phone = phone;
     }
 
-    public Set<Guest> getGuests() {
+    public List<Guest> getGuests() {
         return guests;
     }
 
-    public void setGuests(Set<Guest> guests) {
+    public void setGuests(List<Guest> guests) {
         this.guests = guests;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     public String getName() {

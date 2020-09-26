@@ -1,8 +1,6 @@
 package com.arslan.invitationapp.invitationapp.service;
 
-enum ResponseStatus {
-    OK, FAIL
-}
+import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
 
 public class ServiceResult<T> {
     private T data;

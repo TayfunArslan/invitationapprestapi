@@ -1,7 +1,7 @@
 package com.arslan.invitationapp.invitationapp.data.repository;
 
 import com.arslan.invitationapp.invitationapp.data.entity.Organization;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface IOrganizationRepository extends CrudRepository<Organization, Long> {
+public interface IOrganizationRepository extends JpaRepository<Organization, Long> {
 }

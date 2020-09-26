@@ -1,28 +1,35 @@
 package com.arslan.invitationapp.invitationapp.viewmodel;
 
+import java.time.LocalDate;
+
 public class GuestViewModel {
-    private int id;
-    private int inviterId;
+    private long id;
+    private long inviterId;
     private String name;
+    private String surname;
     private String phone;
     private String email;
     private boolean isCalled;
     private boolean isMailSent;
     private boolean willCome;
+    private long organizationId;
+    private boolean isActive;
+    private boolean isDeleted;
+    private LocalDate createdDatetime;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public int getInviterId() {
+    public long getInviterId() {
         return inviterId;
     }
 
-    public void setInviterId(int inviterId) {
+    public void setInviterId(long inviterId) {
         this.inviterId = inviterId;
     }
 
@@ -32,6 +39,14 @@ public class GuestViewModel {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
     public String getPhone() {
@@ -72,5 +87,37 @@ public class GuestViewModel {
 
     public void setWillCome(boolean willCome) {
         this.willCome = willCome;
+    }
+
+    public long getOrganizationId() {
+        return organizationId;
+    }
+
+    private void setOrganizationId(long organizationId) {
+        this.organizationId = organizationId;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
+    public LocalDate getCreatedDatetime() {
+        return createdDatetime;
+    }
+
+    public void setCreatedDatetime(LocalDate createdDatetime) {
+        this.createdDatetime = createdDatetime;
     }
 }
