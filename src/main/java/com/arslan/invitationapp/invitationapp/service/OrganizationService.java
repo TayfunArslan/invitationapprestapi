@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class OrganizationService implements IOrganizationService {
-    private IOrganizationRepository m_organizationRepository;
-    private IMapper m_mapper;
+    private final IOrganizationRepository m_organizationRepository;
+    private final IMapper m_mapper;
 
     public OrganizationService(IOrganizationRepository organizationRepository, IMapper mapper) {
         m_organizationRepository = organizationRepository;
@@ -31,6 +31,24 @@ public class OrganizationService implements IOrganizationService {
             serviceResult.setData(new OrganizationViewModel());
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
             serviceResult.setMessage("Exception@createOrganization " + ex.getMessage());
+        }
+
+        return serviceResult;
+    }
+
+    @Override
+    public ServiceResult<Boolean> removeOrganizationById(long id) {
+        var serviceResult = new ServiceResult<Boolean>();
+
+        try {
+            m_organizationRepository.deleteById(id);
+
+            serviceResult.setData(true);
+            serviceResult.setResponseStatus(ResponseStatus.OK);
+        } catch (Throwable ex) {
+            serviceResult.setData(false);
+            serviceResult.setResponseStatus(ResponseStatus.FAIL);
+            serviceResult.setMessage(ex.getMessage());
         }
 
         return serviceResult;

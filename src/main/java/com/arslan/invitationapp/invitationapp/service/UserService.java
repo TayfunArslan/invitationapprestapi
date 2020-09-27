@@ -12,8 +12,8 @@ import java.time.LocalDate;
 
 @Service
 public class UserService  implements IUserService {
-    private IUserRepository m_userRepository;
-    private IMapper m_mapper;
+    private final IUserRepository m_userRepository;
+    private final IMapper m_mapper;
 
     public UserService(IUserRepository userRepository, IMapper mapper) {
         m_userRepository = userRepository;

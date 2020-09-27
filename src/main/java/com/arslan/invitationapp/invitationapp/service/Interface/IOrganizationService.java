@@ -5,4 +5,5 @@ import com.arslan.invitationapp.invitationapp.viewmodel.OrganizationViewModel;
 
 public interface IOrganizationService {
     ServiceResult<OrganizationViewModel> addOrganization( OrganizationViewModel organizationViewModel);
+    ServiceResult<Boolean> removeOrganizationById(long id);
 }

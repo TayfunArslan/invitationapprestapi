@@ -6,14 +6,17 @@ import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
 import com.arslan.invitationapp.invitationapp.mapper.IMapper;
 import com.arslan.invitationapp.invitationapp.service.Interface.IGuestService;
 import com.arslan.invitationapp.invitationapp.viewmodel.GuestViewModel;
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GuestService implements IGuestService {
-    private IGuestRepository m_guestRepository;
-    private IUserRepository m_userRepository;
-    private IMapper m_mapper;
+    private final IGuestRepository m_guestRepository;
+    private final IUserRepository m_userRepository;
+    private final IMapper m_mapper;
 
     public GuestService(IGuestRepository guestRepository, IUserRepository userRepository, IMapper mapper) {
         m_guestRepository = guestRepository;
@@ -21,6 +24,28 @@ public class GuestService implements IGuestService {
         m_mapper = mapper;
     }
 
+    @Override
+    public ServiceResult<List<GuestViewModel>> getAllByOrganizationId(long organizationId) {
+        var serviceResult = new ServiceResult<List<GuestViewModel>>();
+
+        try {
+            var guestList = m_guestRepository.getAllByOrganizationId(organizationId)
+                    .stream()
+                    .map(m_mapper::guestToGuestViewModel)
+                    .collect(Collectors.toList());
+
+            serviceResult.setData(guestList);
+            serviceResult.setResponseStatus(ResponseStatus.OK);
+        } catch (Throwable ex) {
+            serviceResult.setData(new ArrayList<>());
+            serviceResult.setResponseStatus(ResponseStatus.FAIL);
+            serviceResult.setMessage(ex.getMessage());
+        }
+
+        return serviceResult;
+    }
+
+    @Override
     public ServiceResult<GuestViewModel> addGuest(GuestViewModel guestViewModel) {
         var serviceResult = new ServiceResult<GuestViewModel>();
 
@@ -45,6 +70,7 @@ public class GuestService implements IGuestService {
         return serviceResult;
     }
 
+    @Override
     public ServiceResult<Boolean> removeGuest(long guestId) {
         var serviceResult = new ServiceResult<Boolean>();
 
