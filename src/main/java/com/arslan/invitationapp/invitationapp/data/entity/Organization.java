@@ -12,7 +12,7 @@ public class Organization extends BaseEntity {
     private String code;
 
     @OneToOne
-    @JoinColumn(name = "created_user_id")
+    @JoinColumn(name = "created_user_id") //We don't have to write. Hibernate writes automatically
     private User createdUser;
 
     public String getName() {

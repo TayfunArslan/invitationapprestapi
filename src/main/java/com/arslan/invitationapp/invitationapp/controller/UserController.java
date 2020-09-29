@@ -3,7 +3,6 @@ package com.arslan.invitationapp.invitationapp.controller;
 import com.arslan.invitationapp.invitationapp.service.Interface.IUserService;
 import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
 import com.arslan.invitationapp.invitationapp.viewmodel.UserViewModel;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,11 +17,16 @@ public class UserController {
 
     @PostMapping("/save")
     public ResponseEntity<UserViewModel> saveUser(@RequestBody UserViewModel userViewModel) {
-        var serviceResult = m_userService.AddUser(userViewModel);
+        var serviceResult = m_userService.addUser(userViewModel);
 
-        if(serviceResult.getResponseStatus() != ResponseStatus.OK)
+        if(serviceResult.getResponseStatus() == ResponseStatus.FAIL)
             return ResponseEntity.badRequest().body(serviceResult.getData());
 
         return ResponseEntity.ok(serviceResult.getData());
     }
+
+//    @GetMapping("/AllUser/{id}")
+//    public ResponseEntity<List<UserViewModel>> getAllUserByOrganizationId(@PathVariable long id) {
+//        var serviceResult = m_userService.
+//    }
 }
