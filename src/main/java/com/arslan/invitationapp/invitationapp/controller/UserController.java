@@ -25,6 +25,11 @@ public class UserController {
         return ResponseEntity.ok(serviceResult.getData());
     }
 
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hello World";
+    }
+
 //    @GetMapping("/AllUser/{id}")
 //    public ResponseEntity<List<UserViewModel>> getAllUserByOrganizationId(@PathVariable long id) {
 //        var serviceResult = m_userService.
