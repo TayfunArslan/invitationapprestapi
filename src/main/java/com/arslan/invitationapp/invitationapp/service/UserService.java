@@ -7,8 +7,11 @@ import com.arslan.invitationapp.invitationapp.mapper.IMapper;
 import com.arslan.invitationapp.invitationapp.service.Interface.IUserService;
 import com.arslan.invitationapp.invitationapp.viewmodel.OrganizationCoOwnerViewModel;
 import com.arslan.invitationapp.invitationapp.viewmodel.UserViewModel;
+import org.postgresql.shaded.com.ongres.scram.common.util.CryptoUtil;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.CryptoPrimitive;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,19 +25,22 @@ public class UserService implements IUserService {
     private final IUserRoleRepository m_userRoleRepository;
     private final IRoleRepository m_roleRepository;
     private final IMapper m_mapper;
+    private final PasswordEncoder m_passwordEncoder;
 
     public UserService(IUserRepository userRepository,
                        IOrganizationRepository organizationRepository,
                        IOrganizationCoOwnerRepository organizationCoOwnerRepository,
                        IUserRoleRepository userRoleRepository,
                        IRoleRepository roleRepository,
-                       IMapper mapper) {
+                       IMapper mapper,
+                       PasswordEncoder passwordEncoder) {
         m_userRepository = userRepository;
         m_organizationRepository = organizationRepository;
         m_organizationCoOwnerRepository = organizationCoOwnerRepository;
         m_userRoleRepository = userRoleRepository;
         m_roleRepository = roleRepository;
         m_mapper = mapper;
+        m_passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -49,6 +55,7 @@ public class UserService implements IUserService {
             if(isEmailExist || isUsernameExist)
                 throw new Exception("User already saved");
 
+            userViewModel.setPassword(m_passwordEncoder.encode(userViewModel.getPassword()));
             userViewModel.setActive(true);
             userViewModel.setDeleted(false);
             userViewModel.setCreatedDatetime(LocalDate.now());
@@ -158,6 +165,27 @@ public class UserService implements IUserService {
         } catch (Throwable ex) {
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
             serviceResult.setMessage(ex.getMessage());
+        }
+
+        return serviceResult;
+    }
+
+    @Override
+    public ServiceResult<UserViewModel> getUserByUsername(String username) {
+        var serviceResult = new ServiceResult<UserViewModel>();
+
+        try {
+            var user = m_userRepository.findByUsername(username);
+
+            if(user.isEmpty())
+                throw new Exception("User not found");
+
+            serviceResult.setData(m_mapper.userToUserViewModel(user.get()));
+            serviceResult.setResponseStatus(ResponseStatus.OK);
+        } catch (Throwable ex) {
+            serviceResult.setResponseStatus(ResponseStatus.FAIL);
+            serviceResult.setMessage(ex.getMessage());
+            serviceResult.setData(new UserViewModel());
         }
 
         return serviceResult;

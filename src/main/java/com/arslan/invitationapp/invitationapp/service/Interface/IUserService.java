@@ -10,4 +10,5 @@ public interface IUserService {
     ServiceResult<UserViewModel> inviteUserToOrganization(long userId, long organizationId);
     ServiceResult<Boolean> removeUser(long userId);
     ServiceResult<List<UserViewModel>> getAllUserByOrganizationId(long organizationId);
+    ServiceResult<UserViewModel> getUserByUsername(String username);
 }

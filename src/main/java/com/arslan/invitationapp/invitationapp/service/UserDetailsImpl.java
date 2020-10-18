@@ -1,5 +1,6 @@
 package com.arslan.invitationapp.invitationapp.service;
 
+import com.arslan.invitationapp.invitationapp.data.entity.Role;
 import com.arslan.invitationapp.invitationapp.data.entity.User;
 import com.arslan.invitationapp.invitationapp.data.entity.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -7,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -30,6 +32,16 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     public static UserDetailsImpl build(User user, UserRole userRole) {
+        if(userRole.getId() == 0) {
+            var role = new Role();
+            role.setName("admin");
+            role.setActive(true);
+            role.setDeleted(false);
+            role.setCreatedDatetime(LocalDate.now());
+
+            userRole.setRole(role);
+        }
+
         var authorities = new ArrayList<GrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority(userRole.getRole().getName()));
 

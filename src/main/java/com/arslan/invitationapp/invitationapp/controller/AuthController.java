@@ -26,12 +26,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("api/auth")
 public class AuthController {
-    AuthenticationManager m_authenticationManager;
-    IUserService m_userService;
-    IRoleService m_roleService;
-    IUserRoleService m_userRoleService;
-    PasswordEncoder m_encoder;
-    JwtUtils m_jwtUtils;
+    private final AuthenticationManager m_authenticationManager;
+    private final IUserService m_userService;
+    private final IRoleService m_roleService;
+    private final IUserRoleService m_userRoleService;
+    private final PasswordEncoder m_encoder;
+    private final JwtUtils m_jwtUtils;
 
     public AuthController(AuthenticationManager authenticationManager,
                           IUserService userService,
@@ -49,25 +49,17 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequestModel loginRequestModel) {
-        var authentication = m_authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(loginRequestModel.getUsername(),
-                        loginRequestModel.getPassword()));
+        var jwt = m_jwtUtils.generateJwtToken(loginRequestModel.getUsername());
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        var user = m_userService.getUserByUsername(loginRequestModel.getUsername());
 
-        var jwt = m_jwtUtils.generateJwtToken(authentication);
-
-        var userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        var roles = userDetails.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
+        if(user.getData().getId() == 0)
+            return ResponseEntity.badRequest().body(new UserViewModel());
 
         return ResponseEntity.ok(new JwtResponseModel(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
-                roles));
+                (long) user.getData().getId(),
+                user.getData().getUsername(),
+                user.getData().getEmail()));
     }
 
     @PostMapping("/signup")
