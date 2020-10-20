@@ -1,12 +1,10 @@
 package com.arslan.invitationapp.invitationapp.security.jwt;
 
-import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
-import com.arslan.invitationapp.invitationapp.service.UserDetailService;
+import com.arslan.invitationapp.invitationapp.service.Interface.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,7 +19,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtils jwtUtils;
     @Autowired
-    private UserDetailService userDetailsService;
+    private IUserService m_userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -33,7 +31,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
                 var username = jwtUtils.getUsernameFromJwtToken(jwt);
-                var userDetails = userDetailsService.loadUserByUsername(username);
+                var userDetails = m_userService.loadUserByUsername(username);
 
                 var authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
                         userDetails.getAuthorities());

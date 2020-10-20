@@ -1,26 +1,19 @@
 package com.arslan.invitationapp.invitationapp.controller;
 
-import com.arslan.invitationapp.invitationapp.data.repository.IRoleRepository;
 import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
 import com.arslan.invitationapp.invitationapp.security.jwt.JwtUtils;
 import com.arslan.invitationapp.invitationapp.service.Interface.IRoleService;
 import com.arslan.invitationapp.invitationapp.service.Interface.IUserRoleService;
 import com.arslan.invitationapp.invitationapp.service.Interface.IUserService;
-import com.arslan.invitationapp.invitationapp.service.UserDetailsImpl;
 import com.arslan.invitationapp.invitationapp.viewmodel.UserViewModel;
 import com.arslan.invitationapp.invitationapp.viewmodel.request.LoginRequestModel;
-import com.arslan.invitationapp.invitationapp.viewmodel.request.SignupRequestModel;
 import com.arslan.invitationapp.invitationapp.viewmodel.response.JwtResponseModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "+", maxAge = 3600)
 @RestController

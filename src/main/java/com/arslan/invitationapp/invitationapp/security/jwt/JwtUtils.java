@@ -1,12 +1,12 @@
 package com.arslan.invitationapp.invitationapp.security.jwt;
 
-import com.arslan.invitationapp.invitationapp.service.UserDetailsImpl;
-import com.arslan.invitationapp.invitationapp.service.UserService;
+import com.arslan.invitationapp.invitationapp.data.repository.IUserRepository;
+import com.arslan.invitationapp.invitationapp.mapper.Mapper;
+import com.arslan.invitationapp.invitationapp.viewmodel.UserViewModel;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -14,12 +14,19 @@ import java.util.Date;
 @Component
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+    private final IUserRepository m_userRepository;
+    private final Mapper m_mapper;
 
     @Value("${app.jwtSecret}")
     private String jwtSecret;
 
     @Value("${app.jwtExpirationMs}")
     private int jwtExpirationMs;
+
+    public JwtUtils(IUserRepository userRepository, Mapper mapper) {
+        m_userRepository = userRepository;
+        m_mapper = mapper;
+    }
 
     public String generateJwtToken(String username) {
         return Jwts.builder()
@@ -28,6 +35,17 @@ public class JwtUtils {
                 .setExpiration(new Date(new Date().getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
+    }
+
+    public UserViewModel getUserFromJwtToken(String token) {
+        var username = getUsernameFromJwtToken(token);
+
+        var user = m_userRepository.findByUsername(username);
+
+        if(user.isPresent())
+            return m_mapper.userToUserViewModel(user.get());
+
+        return new UserViewModel();
     }
 
     public String getUsernameFromJwtToken(String token) {
