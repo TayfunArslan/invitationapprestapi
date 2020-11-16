@@ -6,10 +6,11 @@ import com.arslan.invitationapp.invitationapp.data.entity.User;
 
 import javax.persistence.OneToOne;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class OrganizationCoOwnerViewModel {
     private long id;
-    private LocalDate createdDate;
+    private LocalDateTime createdDatetime;
     private boolean isActive;
     private boolean isDeleted;
     private Organization organization;
@@ -18,9 +19,9 @@ public class OrganizationCoOwnerViewModel {
 
     public OrganizationCoOwnerViewModel() {}
 
-    public OrganizationCoOwnerViewModel(long id, LocalDate createdDate, boolean isActive, boolean isDeleted, Organization organization, User coOwner, Role role) {
+    public OrganizationCoOwnerViewModel(long id, LocalDateTime createdDate, boolean isActive, boolean isDeleted, Organization organization, User coOwner, Role role) {
         this.id = id;
-        this.createdDate = createdDate;
+        this.createdDatetime = createdDate;
         this.isActive = isActive;
         this.isDeleted = isDeleted;
         this.organization = organization;
@@ -36,12 +37,12 @@ public class OrganizationCoOwnerViewModel {
         this.id = id;
     }
 
-    public LocalDate getCreatedDate() {
-        return createdDate;
+    public LocalDateTime getCreatedDatetime() {
+        return createdDatetime;
     }
 
-    public void setCreatedDate(LocalDate createdDate) {
-        this.createdDate = createdDate;
+    public void setCreatedDatetime(LocalDateTime createdDate) {
+        this.createdDatetime = createdDate;
     }
 
     public boolean isActive() {

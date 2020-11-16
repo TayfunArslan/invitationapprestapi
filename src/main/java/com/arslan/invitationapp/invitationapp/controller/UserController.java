@@ -16,7 +16,7 @@ public class UserController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<UserViewModel> saveUser(@RequestBody UserViewModel userViewModel) {
+    public ResponseEntity<?> saveUser(@RequestBody UserViewModel userViewModel) {
         var serviceResult = m_userService.addUser(userViewModel);
 
         if(serviceResult.getResponseStatus() == ResponseStatus.FAIL)

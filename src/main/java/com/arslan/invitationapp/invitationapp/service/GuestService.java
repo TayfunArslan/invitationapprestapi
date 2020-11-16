@@ -28,19 +28,19 @@ public class GuestService implements IGuestService {
     public ServiceResult<List<GuestViewModel>> getAllByOrganizationId(long organizationId) {
         var serviceResult = new ServiceResult<List<GuestViewModel>>();
 
-        try {
-            var guestList = m_guestRepository.getAllByOrganizationId(organizationId)
-                    .stream()
-                    .map(m_mapper::guestToGuestViewModel)
-                    .collect(Collectors.toList());
-
-            serviceResult.setData(guestList);
-            serviceResult.setResponseStatus(ResponseStatus.OK);
-        } catch (Throwable ex) {
-            serviceResult.setData(new ArrayList<>());
-            serviceResult.setResponseStatus(ResponseStatus.FAIL);
-            serviceResult.setMessage(ex.getMessage());
-        }
+//        try {
+//            var guestList = m_guestRepository.getAllByOrganizationId(organizationId)
+//                    .stream()
+//                    .map(m_mapper::guestToGuestViewModel)
+//                    .collect(Collectors.toList());
+//
+//            serviceResult.setData(guestList);
+//            serviceResult.setResponseStatus(ResponseStatus.OK);
+//        } catch (Throwable ex) {
+//            serviceResult.setData(new ArrayList<>());
+//            serviceResult.setResponseStatus(ResponseStatus.FAIL);
+//            serviceResult.setMessage(ex.getMessage());
+//        }
 
         return serviceResult;
     }
@@ -49,23 +49,23 @@ public class GuestService implements IGuestService {
     public ServiceResult<GuestViewModel> addGuest(GuestViewModel guestViewModel) {
         var serviceResult = new ServiceResult<GuestViewModel>();
 
-        try {
-            var guestIsExist =
-                    m_guestRepository.existsGuestByNameAndSurnameAndOrganizationId(guestViewModel.getName(),
-                            guestViewModel.getSurname(), guestViewModel.getOrganizationId());
-
-            if(guestIsExist)
-                throw new Exception("User already invited");
-
-            var guest = m_guestRepository.save(m_mapper.guestViewModelToGuest(guestViewModel));
-
-            serviceResult.setData(m_mapper.guestToGuestViewModel(guest));
-            serviceResult.setResponseStatus(ResponseStatus.OK);
-        } catch (Throwable ex) {
-            serviceResult.setData(new GuestViewModel());
-            serviceResult.setMessage("Exception@addGuestToOrganization" + ex.getMessage());
-            serviceResult.setResponseStatus(ResponseStatus.FAIL);
-        }
+//        try {
+//            var guestIsExist =
+//                    m_guestRepository.existsGuestByNameAndSurnameAndOrganizationId(guestViewModel.getName(),
+//                            guestViewModel.getSurname(), guestViewModel.getOrganizationId());
+//
+//            if(guestIsExist)
+//                throw new Exception("User already invited");
+//
+//            var guest = m_guestRepository.save(m_mapper.guestViewModelToGuest(guestViewModel));
+//
+//            serviceResult.setData(m_mapper.guestToGuestViewModel(guest));
+//            serviceResult.setResponseStatus(ResponseStatus.OK);
+//        } catch (Throwable ex) {
+//            serviceResult.setData(new GuestViewModel());
+//            serviceResult.setMessage("Exception@addGuestToOrganization" + ex.getMessage());
+//            serviceResult.setResponseStatus(ResponseStatus.FAIL);
+//        }
 
         return serviceResult;
     }
@@ -75,7 +75,13 @@ public class GuestService implements IGuestService {
         var serviceResult = new ServiceResult<Boolean>();
 
         try {
-            m_guestRepository.deleteById(guestId);
+            var guest = m_guestRepository.findById(guestId);
+
+            if(guest.isEmpty())
+                throw new Exception("Guest not found");
+
+            guest.get().setActive(false);
+            guest.get().setDeleted(true);
 
             serviceResult.setData(true);
             serviceResult.setResponseStatus(ResponseStatus.OK);

@@ -12,4 +12,5 @@ public interface IUserService extends UserDetailsService {
     ServiceResult<Boolean> removeUser(long userId);
     ServiceResult<List<UserViewModel>> getAllUserByOrganizationId(long organizationId);
     ServiceResult<UserViewModel> getUserByUsername(String username);
+    ServiceResult<UserViewModel> login(String username, String password);
 }

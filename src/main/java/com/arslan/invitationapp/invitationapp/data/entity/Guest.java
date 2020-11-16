@@ -1,6 +1,7 @@
 package com.arslan.invitationapp.invitationapp.data.entity;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "Guests")
@@ -20,7 +21,7 @@ public class Guest extends BaseEntity{
     @Column(name = "will_come")
     private boolean willCome;
 
-    @OneToOne
+    @ManyToOne
     private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

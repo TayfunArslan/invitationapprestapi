@@ -19,35 +19,22 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("api/auth")
 public class AuthController {
-    private final AuthenticationManager m_authenticationManager;
     private final IUserService m_userService;
-    private final IRoleService m_roleService;
-    private final IUserRoleService m_userRoleService;
-    private final PasswordEncoder m_encoder;
     private final JwtUtils m_jwtUtils;
 
-    public AuthController(AuthenticationManager authenticationManager,
-                          IUserService userService,
-                          IRoleService roleService,
-                          IUserRoleService userRoleService,
-                          PasswordEncoder encoder,
-                          JwtUtils jwtUtils) {
-        m_authenticationManager = authenticationManager;
+    public AuthController(IUserService userService, JwtUtils jwtUtils) {
         m_userService = userService;
-        m_roleService = roleService;
-        m_userRoleService = userRoleService;
-        m_encoder = encoder;
         m_jwtUtils = jwtUtils;
     }
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequestModel loginRequestModel) {
+        var user = m_userService.login(loginRequestModel.getUsername(), loginRequestModel.getPassword());
+
+        if(user.getResponseStatus() == ResponseStatus.FAIL)
+            return ResponseEntity.badRequest().body(user.getMessage());
+
         var jwt = m_jwtUtils.generateJwtToken(loginRequestModel.getUsername());
-
-        var user = m_userService.getUserByUsername(loginRequestModel.getUsername());
-
-        if(user.getData().getId() == 0)
-            return ResponseEntity.badRequest().body(new UserViewModel());
 
         return ResponseEntity.ok(new JwtResponseModel(jwt,
                 (long) user.getData().getId(),
@@ -56,11 +43,11 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserViewModel> registerUser(@Valid @RequestBody UserViewModel userViewModel) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserViewModel userViewModel) {
         var serviceResult = m_userService.addUser(userViewModel);
 
         if(serviceResult.getResponseStatus() == ResponseStatus.FAIL)
-            return ResponseEntity.badRequest().body(serviceResult.getData());
+            return ResponseEntity.badRequest().body(serviceResult.getMessage());
 
         return ResponseEntity.ok(serviceResult.getData());
     }

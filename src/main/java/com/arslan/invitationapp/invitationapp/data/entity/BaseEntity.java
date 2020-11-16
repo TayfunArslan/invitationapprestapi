@@ -2,6 +2,7 @@ package com.arslan.invitationapp.invitationapp.data.entity;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @MappedSuperclass
 @Embeddable
@@ -17,7 +18,7 @@ public class BaseEntity {
     private boolean isDeleted;
 
     @Column(name = "created_datetime", nullable = false)
-    private LocalDate createdDatetime;
+    private LocalDateTime createdDatetime;
 
     public long getId() {
         return id;
@@ -43,11 +44,11 @@ public class BaseEntity {
         isDeleted = deleted;
     }
 
-    public LocalDate getCreatedDatetime() {
+    public LocalDateTime getCreatedDatetime() {
         return createdDatetime;
     }
 
-    public void setCreatedDatetime(LocalDate createdDatetime) {
+    public void setCreatedDatetime(LocalDateTime createdDatetime) {
         this.createdDatetime = createdDatetime;
     }
 }

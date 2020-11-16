@@ -1,27 +1,32 @@
 package com.arslan.invitationapp.invitationapp.service;
 
 import com.arslan.invitationapp.invitationapp.data.entity.OrganizationCoOwner;
+import com.arslan.invitationapp.invitationapp.data.entity.Role;
+import com.arslan.invitationapp.invitationapp.data.entity.UserRole;
 import com.arslan.invitationapp.invitationapp.data.repository.*;
 import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
 import com.arslan.invitationapp.invitationapp.mapper.IMapper;
 import com.arslan.invitationapp.invitationapp.service.Interface.IUserService;
-import com.arslan.invitationapp.invitationapp.viewmodel.OrganizationCoOwnerViewModel;
+import com.arslan.invitationapp.invitationapp.viewmodel.RoleViewModel;
 import com.arslan.invitationapp.invitationapp.viewmodel.UserViewModel;
-import org.postgresql.shaded.com.ongres.scram.common.util.CryptoUtil;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 
-import java.security.CryptoPrimitive;
+import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(rollbackOn = Exception.class)
 public class UserService implements IUserService {
     private final IUserRepository m_userRepository;
     private final IOrganizationRepository m_organizationRepository;
@@ -50,11 +55,12 @@ public class UserService implements IUserService {
     @Override
     public ServiceResult<UserViewModel> addUser(UserViewModel userViewModel) {
         //Signup için kullanılan metot. Kullanıcı hangi yetkide olacak ? UserViewModel içinde verilebilir.
+        //13 Kasım update: Organizasyon yaratırken rol verilsin.
         var serviceResult = new ServiceResult<UserViewModel>();
 
         try {
             var isUsernameExist = m_userRepository.existsByUsername(userViewModel.getUsername());
-            var isEmailExist = m_userRepository.existsByUsername(userViewModel.getUsername());
+            var isEmailExist = m_userRepository.existsByEmail(userViewModel.getEmail());
 
             if(isEmailExist || isUsernameExist)
                 throw new Exception("User already saved");
@@ -62,7 +68,7 @@ public class UserService implements IUserService {
             userViewModel.setPassword(m_passwordEncoder.encode(userViewModel.getPassword()));
             userViewModel.setActive(true);
             userViewModel.setDeleted(false);
-            userViewModel.setCreatedDatetime(LocalDate.now());
+            userViewModel.setCreatedDatetime(LocalDateTime.now());
 
             var user = m_userRepository.save(m_mapper.userViewModelToUser(userViewModel));
 
@@ -104,7 +110,7 @@ public class UserService implements IUserService {
             organizationCoOwner.setOrganization(organization.get());
             organizationCoOwner.setActive(true);
             organizationCoOwner.setDeleted(false);
-            organizationCoOwner.setCreatedDatetime(LocalDate.now());
+            organizationCoOwner.setCreatedDatetime(LocalDateTime.now());
 
             m_organizationCoOwnerRepository.save(organizationCoOwner);
         } catch (Throwable ex) {
@@ -190,6 +196,29 @@ public class UserService implements IUserService {
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
             serviceResult.setMessage(ex.getMessage());
             serviceResult.setData(new UserViewModel());
+        }
+
+        return serviceResult;
+    }
+
+    @Override
+    public ServiceResult<UserViewModel> login(String username, String password) {
+        var serviceResult = new ServiceResult<UserViewModel>();
+
+        try {
+            var user = m_userRepository.findByUsername(username);
+
+            if(user.isEmpty())
+                throw new Exception("User not found");
+
+            if(!m_passwordEncoder.matches(password, user.get().getPassword()))
+                throw new Exception("Password is incorrect");
+
+            serviceResult.setData(m_mapper.userToUserViewModel(user.get()));
+            serviceResult.setResponseStatus(ResponseStatus.OK);
+        } catch (Throwable ex) {
+            serviceResult.setMessage(ex.getMessage() + " Exception@login");
+            serviceResult.setResponseStatus(ResponseStatus.FAIL);
         }
 
         return serviceResult;

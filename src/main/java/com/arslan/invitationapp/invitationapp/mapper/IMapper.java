@@ -1,14 +1,10 @@
 package com.arslan.invitationapp.invitationapp.mapper;
 
-import com.arslan.invitationapp.invitationapp.data.entity.Guest;
-import com.arslan.invitationapp.invitationapp.data.entity.Organization;
-import com.arslan.invitationapp.invitationapp.data.entity.OrganizationCoOwner;
-import com.arslan.invitationapp.invitationapp.data.entity.User;
-import com.arslan.invitationapp.invitationapp.viewmodel.GuestViewModel;
-import com.arslan.invitationapp.invitationapp.viewmodel.OrganizationCoOwnerViewModel;
-import com.arslan.invitationapp.invitationapp.viewmodel.OrganizationViewModel;
-import com.arslan.invitationapp.invitationapp.viewmodel.UserViewModel;
+import com.arslan.invitationapp.invitationapp.data.entity.*;
+import com.arslan.invitationapp.invitationapp.viewmodel.*;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
 @Mapper(implementationName = "Mapper", componentModel = "spring")
 public  interface IMapper {
@@ -23,4 +19,7 @@ public  interface IMapper {
 
     OrganizationCoOwnerViewModel organizationCoOwnerToOrganizationCoOwnerViewModel(OrganizationCoOwner organizationCoOwner);
     OrganizationCoOwner organizationCoOwnerViewModelToOrganizationCoOwner(OrganizationCoOwnerViewModel organizationCoOwnerViewModel);
+
+    Role roleViewModelToRole(RoleViewModel roleViewModel);
+    RoleViewModel roleToRoleViewModel(Role role);
 }

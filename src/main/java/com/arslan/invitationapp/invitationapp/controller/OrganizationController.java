@@ -2,25 +2,42 @@ package com.arslan.invitationapp.invitationapp.controller;
 
 import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
 import com.arslan.invitationapp.invitationapp.service.Interface.IOrganizationService;
+import com.arslan.invitationapp.invitationapp.service.Interface.IUserService;
 import com.arslan.invitationapp.invitationapp.viewmodel.OrganizationViewModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/organization")
-public class OrganizationController {
+public class OrganizationController extends BaseController {
     private final IOrganizationService m_organizationService;
+    private final IUserService m_userService;
 
-    public OrganizationController(IOrganizationService organizationService) {
+    public OrganizationController(IOrganizationService organizationService, IUserService userService) {
+        super(userService);
         m_organizationService = organizationService;
+        m_userService = userService;
+    }
+
+    @GetMapping("/organizations")
+    public ResponseEntity<?> getMyOrganization() {
+        var currentUserId = getCurrentUserId();
+        var serviceResult = m_organizationService.getMyOrganizations(currentUserId);
+
+        if(serviceResult.getResponseStatus() == ResponseStatus.FAIL)
+            return ResponseEntity.badRequest().body(serviceResult.getMessage());
+
+        return ResponseEntity.ok(serviceResult.getData());
     }
 
     @PostMapping("/save")
-    public ResponseEntity<OrganizationViewModel> addOrganization( @RequestBody OrganizationViewModel organizationViewModel) {
-        var serviceResult = m_organizationService.addOrganization(organizationViewModel);
+    public ResponseEntity<?> addOrganization( @RequestBody OrganizationViewModel organizationViewModel) {
+        var currentUserId = getCurrentUserId();
+
+        var serviceResult = m_organizationService.addOrganization(organizationViewModel, currentUserId);
 
         if(serviceResult.getResponseStatus() == ResponseStatus.FAIL)
-            return ResponseEntity.badRequest().body(new OrganizationViewModel());
+            return ResponseEntity.badRequest().body(serviceResult.getMessage());
 
         return ResponseEntity.ok(serviceResult.getData());
     }

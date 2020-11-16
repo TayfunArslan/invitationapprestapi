@@ -1,6 +1,7 @@
 package com.arslan.invitationapp.invitationapp.viewmodel;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class GuestViewModel {
     private long id;
@@ -15,7 +16,7 @@ public class GuestViewModel {
     private long organizationId;
     private boolean isActive;
     private boolean isDeleted;
-    private LocalDate createdDatetime;
+    private LocalDateTime createdDatetime;
 
     public long getId() {
         return id;
@@ -113,11 +114,11 @@ public class GuestViewModel {
         isDeleted = deleted;
     }
 
-    public LocalDate getCreatedDatetime() {
+    public LocalDateTime getCreatedDatetime() {
         return createdDatetime;
     }
 
-    public void setCreatedDatetime(LocalDate createdDatetime) {
+    public void setCreatedDatetime(LocalDateTime createdDatetime) {
         this.createdDatetime = createdDatetime;
     }
 }

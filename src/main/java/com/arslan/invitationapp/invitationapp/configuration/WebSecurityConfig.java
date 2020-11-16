@@ -5,6 +5,7 @@ import com.arslan.invitationapp.invitationapp.security.jwt.AuthTokenFilter;
 import com.arslan.invitationapp.invitationapp.service.Interface.IUserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -23,7 +24,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final IUserService m_userService;
     private final AuthEntryPointJwt m_unauthorizedHandler;
 
-    public WebSecurityConfig(IUserService userService, AuthEntryPointJwt unauthorizedHandler) {
+    public WebSecurityConfig(@Lazy IUserService userService, AuthEntryPointJwt unauthorizedHandler) {
         m_userService = userService;
         m_unauthorizedHandler = unauthorizedHandler;
     }
