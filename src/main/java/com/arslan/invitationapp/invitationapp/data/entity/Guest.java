@@ -1,7 +1,6 @@
 package com.arslan.invitationapp.invitationapp.data.entity;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "Guests")
@@ -21,12 +20,32 @@ public class Guest extends BaseEntity{
     @Column(name = "will_come")
     private boolean willCome;
 
-    @ManyToOne
+    @Column(name = "organization_id")
+    private int organizationId;
+
+    @OneToOne
+    @Transient
     private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "inviter_id", nullable = false)
     private User user;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
 
     public boolean isCalled() {
         return isCalled;
@@ -50,6 +69,14 @@ public class Guest extends BaseEntity{
 
     public void setWillCome(boolean willCome) {
         this.willCome = willCome;
+    }
+
+    public int getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(int organizationId) {
+        this.organizationId = organizationId;
     }
 
     public Organization getOrganization() {

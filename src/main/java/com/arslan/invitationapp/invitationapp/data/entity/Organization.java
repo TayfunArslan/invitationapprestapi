@@ -1,7 +1,6 @@
 package com.arslan.invitationapp.invitationapp.data.entity;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "Organizations")
@@ -12,11 +11,11 @@ public class Organization extends BaseEntity {
     @Column(name = "code")
     private String code;
 
-    @OneToMany(mappedBy = "organization", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Guest> guests;
+    @Column(name = "created_user_id")
+    private int createdUserId;
 
-    @ManyToOne
-    @JoinColumn(name = "created_user_id") //We don't have to write. Hibernate writes automatically
+    @OneToOne
+    @Transient
     private User createdUser;
 
     public String getName() {
@@ -35,19 +34,15 @@ public class Organization extends BaseEntity {
         this.code = code;
     }
 
-    public List<Guest> getGuests() {
-        return guests;
+    public int getCreatedUserId() {
+        return createdUserId;
     }
 
-    public void setGuests(List<Guest> guests) {
-        this.guests = guests;
+    public void setCreatedUserId(int createdUserId) {
+        this.createdUserId = createdUserId;
     }
 
     public User getCreatedUser() {
-        return createdUser;
-    }
-
-    public User getCreatedUserId() {
         return createdUser;
     }
 

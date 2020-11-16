@@ -1,20 +1,39 @@
 package com.arslan.invitationapp.invitationapp.data.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "User_Roles")
 public class UserRole extends BaseEntity{
+    private int userId;
+    private int roleId;
+
     @OneToOne
+    @Transient
     private User user;
 
     @OneToOne
+    @Transient
     private Role role;
 
     @OneToOne
     private Organization organization;
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public int getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(int roleId) {
+        this.roleId = roleId;
+    }
 
     public User getUser() {
         return user;

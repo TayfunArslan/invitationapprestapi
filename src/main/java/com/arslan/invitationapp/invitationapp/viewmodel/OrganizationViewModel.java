@@ -1,27 +1,18 @@
 package com.arslan.invitationapp.invitationapp.viewmodel;
 
-import java.time.LocalDateTime;
+import com.arslan.invitationapp.invitationapp.data.entity.User;
 
 public class OrganizationViewModel {
     private int id;
     private String name;
-    private boolean isActive;
-    private boolean isDeleted;
-    private LocalDateTime createdDatetime;
-    private UserViewModel createdUser;
-    private String code;
+    private int createdUserId;
 
-    public OrganizationViewModel() {
-    }
+    public OrganizationViewModel() {}
 
-    public OrganizationViewModel(int id, String name, boolean isActive, boolean isDeleted, LocalDateTime createdDate, UserViewModel createdUser, String code) {
+    public OrganizationViewModel(int id, String name, int createdUserId) {
         this.id = id;
         this.name = name;
-        this.isActive = isActive;
-        this.isDeleted = isDeleted;
-        this.createdDatetime = createdDate;
-        this.createdUser = createdUser;
-        this.code = code;
+        this.createdUserId = createdUserId;
     }
 
     public int getId() {
@@ -40,43 +31,11 @@ public class OrganizationViewModel {
         this.name = name;
     }
 
-    public boolean isActive() {
-        return isActive;
+    public int getCreatedUserId() {
+        return createdUserId;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
-
-    public LocalDateTime getCreatedDatetime() {
-        return createdDatetime;
-    }
-
-    public void setCreatedDatetime(LocalDateTime createdDate) {
-        this.createdDatetime = createdDate;
-    }
-
-    public UserViewModel getCreatedUser() {
-        return createdUser;
-    }
-
-    public void setCreatedUser(UserViewModel createdUser) {
-        this.createdUser = createdUser;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
+    public void setCreatedUserId(int createdUserId) {
+        this.createdUserId = createdUserId;
     }
 }
