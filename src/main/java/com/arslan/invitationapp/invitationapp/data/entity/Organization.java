@@ -1,6 +1,7 @@
 package com.arslan.invitationapp.invitationapp.data.entity;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "Organizations")
@@ -11,12 +12,11 @@ public class Organization extends BaseEntity {
     @Column(name = "code")
     private String code;
 
-    @Column(name = "created_user_id")
-    private int createdUserId;
-
     @OneToOne
-    @Transient
     private User createdUser;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Guest> guests;
 
     public String getName() {
         return name;
@@ -34,19 +34,19 @@ public class Organization extends BaseEntity {
         this.code = code;
     }
 
-    public int getCreatedUserId() {
-        return createdUserId;
-    }
-
-    public void setCreatedUserId(int createdUserId) {
-        this.createdUserId = createdUserId;
-    }
-
     public User getCreatedUser() {
         return createdUser;
     }
 
     public void setCreatedUser(User createdUser) {
         this.createdUser = createdUser;
+    }
+
+    public List<Guest> getGuests() {
+        return guests;
+    }
+
+    public void setGuests(List<Guest> guests) {
+        this.guests = guests;
     }
 }

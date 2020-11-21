@@ -20,11 +20,8 @@ public class Guest extends BaseEntity{
     @Column(name = "will_come")
     private boolean willCome;
 
-    @Column(name = "organization_id")
-    private int organizationId;
-
-    @OneToOne
-    @Transient
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -69,14 +66,6 @@ public class Guest extends BaseEntity{
 
     public void setWillCome(boolean willCome) {
         this.willCome = willCome;
-    }
-
-    public int getOrganizationId() {
-        return organizationId;
-    }
-
-    public void setOrganizationId(int organizationId) {
-        this.organizationId = organizationId;
     }
 
     public Organization getOrganization() {
