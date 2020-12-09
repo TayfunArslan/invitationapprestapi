@@ -2,25 +2,25 @@ package com.arslan.invitationapp.invitationapp.controller;
 
 import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
 import com.arslan.invitationapp.invitationapp.service.Interface.IGuestService;
+import com.arslan.invitationapp.invitationapp.service.Interface.IUserService;
 import com.arslan.invitationapp.invitationapp.viewmodel.GuestViewModel;
-import com.arslan.invitationapp.invitationapp.viewmodel.request.GuestOrganizationRequestModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/guest")
-public class GuestController {
+public class GuestController extends BaseController {
     private final IGuestService m_guestService;
 
-    public GuestController(IGuestService guestService) {
+    public GuestController(IGuestService guestService, IUserService userService1) {
         m_guestService = guestService;
     }
 
     @PostMapping("/save")
-    public ResponseEntity<?> addGuestToOrganization(GuestViewModel guestModel) {
+    public ResponseEntity<?> addGuestToOrganization(@RequestBody GuestViewModel guestModel) {
+        var currentUserId = getCurrentUserId();
+        guestModel.setInviterId(currentUserId);
+
         var serviceResult = m_guestService.addGuest(guestModel);
 
         if (serviceResult.getResponseStatus() == ResponseStatus.FAIL)

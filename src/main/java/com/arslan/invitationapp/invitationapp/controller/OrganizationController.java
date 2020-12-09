@@ -11,12 +11,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("api/organization")
 public class OrganizationController extends BaseController {
     private final IOrganizationService m_organizationService;
-    private final IUserService m_userService;
 
-    public OrganizationController(IOrganizationService organizationService, IUserService userService) {
-        super(userService);
+    public OrganizationController(IOrganizationService organizationService) {
         m_organizationService = organizationService;
-        m_userService = userService;
     }
 
     @GetMapping("/organizations")
@@ -31,7 +28,7 @@ public class OrganizationController extends BaseController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<?> addOrganization( @RequestBody OrganizationViewModel organizationViewModel) {
+    public ResponseEntity<?> addOrganization(@RequestBody OrganizationViewModel organizationViewModel) {
         var currentUserId = getCurrentUserId();
 
         var serviceResult = m_organizationService.addOrganization(organizationViewModel, currentUserId);

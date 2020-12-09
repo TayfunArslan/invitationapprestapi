@@ -7,6 +7,7 @@ import com.arslan.invitationapp.invitationapp.data.repository.*;
 import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
 import com.arslan.invitationapp.invitationapp.mapper.IMapper;
 import com.arslan.invitationapp.invitationapp.service.Interface.IUserService;
+import com.arslan.invitationapp.invitationapp.viewmodel.CustomUserDetails;
 import com.arslan.invitationapp.invitationapp.viewmodel.RoleViewModel;
 import com.arslan.invitationapp.invitationapp.viewmodel.UserViewModel;
 import org.springframework.security.core.GrantedAuthority;
@@ -62,7 +63,7 @@ public class UserService implements IUserService {
             var isUsernameExist = m_userRepository.existsByUsername(userViewModel.getUsername());
             var isEmailExist = m_userRepository.existsByEmail(userViewModel.getEmail());
 
-            if(isEmailExist || isUsernameExist)
+            if (isEmailExist || isUsernameExist)
                 throw new Exception("User already saved");
 
             userViewModel.setPassword(m_passwordEncoder.encode(userViewModel.getPassword()));
@@ -93,15 +94,15 @@ public class UserService implements IUserService {
             var user = m_userRepository.findById(userId);
             var organization = m_organizationRepository.findById(organizationId);
 
-            if(user.isEmpty())
+            if (user.isEmpty())
                 throw new Exception("User not found");
 
-            if(organization.isEmpty())
+            if (organization.isEmpty())
                 throw new Exception("Organization not found");
 
             //OrganizationCoOwner'a mod rolü ile kayıt atılmalı. TODO İleride değiştirilebilir. Role de dışarıdan alınabilir.
             var role = m_roleRepository.findByName("mod");
-            if(role.isEmpty())
+            if (role.isEmpty())
                 throw new Exception("Role not found");
 
             var organizationCoOwner = new OrganizationCoOwner();
@@ -154,23 +155,23 @@ public class UserService implements IUserService {
 
         try {
             //OrganizationOwner and CoOwners
-            var userList = new ArrayList<UserViewModel>();
-
-            var owner = m_organizationRepository.findUserById(organizationId);
-            owner.ifPresent(o -> {
-                var userViewModel = m_mapper.userToUserViewModel(o);
-                userList.add(userViewModel);
-            });
-
-            var coOwners = m_organizationCoOwnerRepository
-                    .findUsersById(organizationId)
-                    .stream()
-                    .map(m_mapper::userToUserViewModel)
-                    .collect(Collectors.toList());
-
-            userList.addAll(coOwners);
-
-            serviceResult.setData(userList);
+//            var userList = new ArrayList<UserViewModel>();
+//
+//            var owner = m_organizationRepository.findUserById(organizationId);
+//            owner.ifPresent(o -> {
+//                var userViewModel = m_mapper.userToUserViewModel(o);
+//                userList.add(userViewModel);
+//            });
+//
+//            var coOwners = m_organizationCoOwnerRepository
+//                    .findUsersById(organizationId)
+//                    .stream()
+//                    .map(m_mapper::userToUserViewModel)
+//                    .collect(Collectors.toList());
+//
+//            userList.addAll(coOwners);
+//
+//            serviceResult.setData(userList);
             serviceResult.setResponseStatus(ResponseStatus.OK);
         } catch (Throwable ex) {
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
@@ -187,7 +188,7 @@ public class UserService implements IUserService {
         try {
             var user = m_userRepository.findByUsername(username);
 
-            if(user.isEmpty())
+            if (user.isEmpty())
                 throw new Exception("User not found");
 
             serviceResult.setData(m_mapper.userToUserViewModel(user.get()));
@@ -208,10 +209,10 @@ public class UserService implements IUserService {
         try {
             var user = m_userRepository.findByUsername(username);
 
-            if(user.isEmpty())
+            if (user.isEmpty())
                 throw new Exception("User not found");
 
-            if(!m_passwordEncoder.matches(password, user.get().getPassword()))
+            if (!m_passwordEncoder.matches(password, user.get().getPassword()))
                 throw new Exception("Password is incorrect");
 
             serviceResult.setData(m_mapper.userToUserViewModel(user.get()));
@@ -225,11 +226,11 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) {
+    public CustomUserDetails loadUserByUsername(String username) {
         var user = m_userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        return new UserDetails() {
+        return new CustomUserDetails() {
             @Override
             public Collection<? extends GrantedAuthority> getAuthorities() {
                 return null;
@@ -238,6 +239,11 @@ public class UserService implements IUserService {
             @Override
             public String getPassword() {
                 return user.getPassword();
+            }
+
+            @Override
+            public long getUserId() {
+                return user.getId();
             }
 
             @Override
