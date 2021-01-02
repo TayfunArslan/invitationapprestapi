@@ -19,12 +19,11 @@ public class GuestController extends BaseController {
     @PostMapping("/save")
     public ResponseEntity<?> addGuestToOrganization(@RequestBody GuestViewModel guestModel) {
         var currentUserId = getCurrentUserId();
-        guestModel.setInviterId(currentUserId);
 
-        var serviceResult = m_guestService.addGuest(guestModel);
+        var serviceResult = m_guestService.addGuest(guestModel, currentUserId);
 
         if (serviceResult.getResponseStatus() == ResponseStatus.FAIL)
-            return ResponseEntity.badRequest().body(serviceResult.getMessage());
+            return ResponseEntity.badRequest().body(serviceResult.getErrorModel());
 
         return ResponseEntity.ok(serviceResult.getData());
     }

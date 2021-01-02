@@ -1,4 +1,4 @@
-package com.arslan.invitationapp.invitationapp.viewmodel;
+package com.arslan.invitationapp.invitationapp.service.Interface;
 
 import org.springframework.security.core.userdetails.UserDetails;
 

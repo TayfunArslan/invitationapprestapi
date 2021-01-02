@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface IOrganizationCoOwnerRepository extends JpaRepository<OrganizationCoOwner, Long> {
-    List<User> findUsersById(long id);
+//    List<User> findUsersById(long id);
 }

@@ -6,11 +6,14 @@ import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
 import com.arslan.invitationapp.invitationapp.mapper.IMapper;
 import com.arslan.invitationapp.invitationapp.service.Interface.IGuestService;
 import com.arslan.invitationapp.invitationapp.viewmodel.GuestViewModel;
+import com.arslan.invitationapp.invitationapp.viewmodel.serviceResult.ErrorModel;
+import com.arslan.invitationapp.invitationapp.viewmodel.serviceResult.ServiceResult;
+import com.arslan.invitationapp.invitationapp.enums.ErrorCodes;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,36 +31,42 @@ public class GuestService implements IGuestService {
     @Override
     public ServiceResult<List<GuestViewModel>> getAllByOrganizationId(long organizationId) {
         var serviceResult = new ServiceResult<List<GuestViewModel>>();
+        Optional<Integer> errorCode;
 
-//        try {
-//            var guestList = m_guestRepository.getAllByOrganizationId(organizationId)
-//                    .stream()
-//                    .map(m_mapper::guestToGuestViewModel)
-//                    .collect(Collectors.toList());
-//
-//            serviceResult.setData(guestList);
-//            serviceResult.setResponseStatus(ResponseStatus.OK);
-//        } catch (Throwable ex) {
-//            serviceResult.setData(new ArrayList<>());
-//            serviceResult.setResponseStatus(ResponseStatus.FAIL);
-//            serviceResult.setMessage(ex.getMessage());
-//        }
+        try {
+            var guestList = m_guestRepository.getAllByOrganizationId(organizationId)
+                    .stream()
+                    .map(m_mapper::guestToGuestViewModel)
+                    .collect(Collectors.toList());
+
+            serviceResult.setData(guestList);
+            serviceResult.setResponseStatus(ResponseStatus.OK);
+        } catch (Throwable ex) {
+            errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
+
+            serviceResult.setResponseStatus(ResponseStatus.FAIL);
+            serviceResult.setErrorModel(new ErrorModel(errorCode, "Exception@getAllByOrganizationId" + ex.getMessage()));
+        }
 
         return serviceResult;
     }
 
     @Override
-    public ServiceResult<GuestViewModel> addGuest(GuestViewModel guestViewModel) {
+    public ServiceResult<GuestViewModel> addGuest(GuestViewModel guestViewModel, long currentUserId) {
         var serviceResult = new ServiceResult<GuestViewModel>();
+        Optional<Integer> errorCode = Optional.empty();
 
         try {
             var guestIsExist =
                     m_guestRepository.existsGuestByNameAndSurnameAndOrganizationId(guestViewModel.getName(),
                             guestViewModel.getSurname(), guestViewModel.getOrganizationId());
 
-            if (guestIsExist)
+            if (guestIsExist) {
+                errorCode = Optional.of(ErrorCodes.GUEST_ALREADY_INVITED.getCode());
                 throw new Exception("User already invited");
+            }
 
+            guestViewModel.setInviterId(currentUserId);
             guestViewModel.setCreatedDatetime(LocalDateTime.now());
             guestViewModel.setActive(true);
             guestViewModel.setDeleted(false);
@@ -68,9 +77,12 @@ public class GuestService implements IGuestService {
             serviceResult.setData(m_mapper.guestToGuestViewModel(guest));
             serviceResult.setResponseStatus(ResponseStatus.OK);
         } catch (Throwable ex) {
+            if (errorCode.isEmpty())
+                errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
+
             serviceResult.setData(new GuestViewModel());
-            serviceResult.setMessage("Exception@addGuestToOrganization" + ex.getMessage());
-            serviceResult.setResponseStatus(ResponseStatus.FAIL);
+            serviceResult.setErrorModel(new ErrorModel(errorCode,
+                    "Exception@addGuestToOrganization " + ex.getMessage()));
         }
 
         return serviceResult;
@@ -79,12 +91,15 @@ public class GuestService implements IGuestService {
     @Override
     public ServiceResult<Boolean> removeGuest(long guestId) {
         var serviceResult = new ServiceResult<Boolean>();
+        Optional<Integer> errorCode = Optional.empty();
 
         try {
             var guest = m_guestRepository.findById(guestId);
 
-            if (guest.isEmpty())
+            if (guest.isEmpty()) {
+                errorCode = Optional.of(ErrorCodes.GUEST_NOT_FOUND.getCode());
                 throw new Exception("Guest not found");
+            }
 
             guest.get().setActive(false);
             guest.get().setDeleted(true);
@@ -92,9 +107,11 @@ public class GuestService implements IGuestService {
             serviceResult.setData(true);
             serviceResult.setResponseStatus(ResponseStatus.OK);
         } catch (Throwable ex) {
-            serviceResult.setData(false);
+            if (errorCode.isEmpty())
+                errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
+
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
-            serviceResult.setMessage(ex.getMessage());
+            serviceResult.setErrorModel(new ErrorModel(errorCode, "Exception@removeGuest" + ex.getMessage()));
         }
 
         return serviceResult;

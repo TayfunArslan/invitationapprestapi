@@ -22,7 +22,7 @@ public class OrganizationController extends BaseController {
         var serviceResult = m_organizationService.getMyOrganizations(currentUserId);
 
         if(serviceResult.getResponseStatus() == ResponseStatus.FAIL)
-            return ResponseEntity.badRequest().body(serviceResult.getMessage());
+            return ResponseEntity.badRequest().body(serviceResult.getErrorModel());
 
         return ResponseEntity.ok(serviceResult.getData());
     }
@@ -34,17 +34,18 @@ public class OrganizationController extends BaseController {
         var serviceResult = m_organizationService.addOrganization(organizationViewModel, currentUserId);
 
         if(serviceResult.getResponseStatus() == ResponseStatus.FAIL)
-            return ResponseEntity.badRequest().body(serviceResult.getMessage());
+            return ResponseEntity.badRequest().body(serviceResult.getErrorModel());
 
         return ResponseEntity.ok(serviceResult.getData());
     }
 
     @PostMapping("/delete/{organizationId}")
-    public ResponseEntity<Boolean> removeOrganization(@PathVariable long organizationId) {
-        var serviceResult = m_organizationService.removeOrganizationById(organizationId);
+    public ResponseEntity<?> removeOrganization(@PathVariable long organizationId) {
+        var currentUserId = getCurrentUserId();
+        var serviceResult = m_organizationService.removeOrganizationById(organizationId, currentUserId);
 
-        if(serviceResult.getResponseStatus() == ResponseStatus.FAIL)
-            return ResponseEntity.badRequest().body(serviceResult.getData());
+        if (serviceResult.getResponseStatus() == ResponseStatus.FAIL)
+            return ResponseEntity.badRequest().body(serviceResult.getErrorModel());
 
         return ResponseEntity.ok(serviceResult.getData());
     }

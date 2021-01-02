@@ -12,6 +12,4 @@ public class RoleService implements IRoleService {
     public RoleService(IRoleRepository roleRepository) {
         m_roleRepository = roleRepository;
     }
-
-
 }

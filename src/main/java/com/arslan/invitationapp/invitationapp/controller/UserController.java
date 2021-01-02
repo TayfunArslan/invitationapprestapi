@@ -20,7 +20,7 @@ public class UserController {
         var serviceResult = m_userService.addUser(userViewModel);
 
         if(serviceResult.getResponseStatus() == ResponseStatus.FAIL)
-            return ResponseEntity.badRequest().body(serviceResult.getData());
+            return ResponseEntity.badRequest().body(serviceResult.getErrorModel());
 
         return ResponseEntity.ok(serviceResult.getData());
     }

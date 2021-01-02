@@ -1,30 +1,28 @@
 package com.arslan.invitationapp.invitationapp.service;
 
 import com.arslan.invitationapp.invitationapp.data.entity.OrganizationCoOwner;
-import com.arslan.invitationapp.invitationapp.data.entity.Role;
-import com.arslan.invitationapp.invitationapp.data.entity.UserRole;
 import com.arslan.invitationapp.invitationapp.data.repository.*;
 import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
+import com.arslan.invitationapp.invitationapp.enums.Role;
 import com.arslan.invitationapp.invitationapp.mapper.IMapper;
 import com.arslan.invitationapp.invitationapp.service.Interface.IUserService;
-import com.arslan.invitationapp.invitationapp.viewmodel.CustomUserDetails;
-import com.arslan.invitationapp.invitationapp.viewmodel.RoleViewModel;
+import com.arslan.invitationapp.invitationapp.service.Interface.CustomUserDetails;
+import com.arslan.invitationapp.invitationapp.viewmodel.serviceResult.ErrorModel;
+import com.arslan.invitationapp.invitationapp.viewmodel.serviceResult.ServiceResult;
 import com.arslan.invitationapp.invitationapp.viewmodel.UserViewModel;
+import com.arslan.invitationapp.invitationapp.enums.ErrorCodes;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import static java.util.Optional.empty;
 
 @Service
 @Transactional(rollbackOn = Exception.class)
@@ -58,13 +56,20 @@ public class UserService implements IUserService {
         //Signup için kullanılan metot. Kullanıcı hangi yetkide olacak ? UserViewModel içinde verilebilir.
         //13 Kasım update: Organizasyon yaratırken rol verilsin.
         var serviceResult = new ServiceResult<UserViewModel>();
+        Optional<Integer> errorCode = empty();
 
         try {
             var isUsernameExist = m_userRepository.existsByUsername(userViewModel.getUsername());
-            var isEmailExist = m_userRepository.existsByEmail(userViewModel.getEmail());
+            if (isUsernameExist) {
+                errorCode = Optional.of(ErrorCodes.USERNAME_EXIST.getCode());
+                throw new Exception(ErrorCodes.USERNAME_EXIST.name());
+            }
 
-            if (isEmailExist || isUsernameExist)
+            var isEmailExist = m_userRepository.existsByEmail(userViewModel.getEmail());
+            if (isEmailExist) {
+                errorCode = Optional.of(ErrorCodes.MAIL_EXIST.getCode());
                 throw new Exception("User already saved");
+            }
 
             userViewModel.setPassword(m_passwordEncoder.encode(userViewModel.getPassword()));
             userViewModel.setActive(true);
@@ -76,9 +81,12 @@ public class UserService implements IUserService {
             serviceResult.setData(m_mapper.userToUserViewModel(user));
             serviceResult.setResponseStatus(ResponseStatus.OK);
         } catch (Throwable ex) {
+            if (errorCode.isEmpty())
+                errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
+
             serviceResult.setData(new UserViewModel());
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
-            serviceResult.setMessage("Exception@setCoOwner" + ex.getMessage());
+            serviceResult.setErrorModel(new ErrorModel(errorCode, "Exception@AddUser " + ex.getMessage()));
         }
 
         return serviceResult;
@@ -89,21 +97,35 @@ public class UserService implements IUserService {
         //Todo davet mekanizması nasıl olacak? userId'yi bilemeyebilirim. Mail yada telefon numarası ile
         // değiştirilebilir.
         var serviceResult = new ServiceResult<UserViewModel>();
+        Optional<Integer> errorCode = Optional.empty();
 
         try {
             var user = m_userRepository.findById(userId);
             var organization = m_organizationRepository.findById(organizationId);
 
-            if (user.isEmpty())
-                throw new Exception("User not found");
 
-            if (organization.isEmpty())
+            if (user.isEmpty()) {
+                errorCode = Optional.of(ErrorCodes.USER_NOT_FOUND.getCode());
+                throw new Exception("User not found");
+            }
+
+            if (organization.isEmpty()) {
+                errorCode = Optional.of(ErrorCodes.ORGANIZATION_NOT_FOUND.getCode());
                 throw new Exception("Organization not found");
+            }
 
             //OrganizationCoOwner'a mod rolü ile kayıt atılmalı. TODO İleride değiştirilebilir. Role de dışarıdan alınabilir.
-            var role = m_roleRepository.findByName("mod");
-            if (role.isEmpty())
-                throw new Exception("Role not found");
+            var role = m_roleRepository.findByName(Role.MOD.name());
+
+            if (role.isEmpty()) {
+                var modRole = new com.arslan.invitationapp.invitationapp.data.entity.Role();
+                modRole.setActive(true);
+                modRole.setDeleted(false);
+                modRole.setName(Role.MOD.name());
+                modRole.setCreatedDatetime(LocalDateTime.now());
+
+                role = Optional.of(modRole);
+            }
 
             var organizationCoOwner = new OrganizationCoOwner();
             organizationCoOwner.setCoOwner(user.get());
@@ -115,8 +137,11 @@ public class UserService implements IUserService {
 
             m_organizationCoOwnerRepository.save(organizationCoOwner);
         } catch (Throwable ex) {
-            serviceResult.setMessage(ex.getMessage());
+            if (errorCode.isEmpty())
+                errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
+
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
+            serviceResult.setErrorModel(new ErrorModel(errorCode, "Exception@InviteUserToOrganization" + ex.getMessage()));
         }
 
         return serviceResult;
@@ -125,12 +150,15 @@ public class UserService implements IUserService {
     @Override
     public ServiceResult<Boolean> removeUser(long userId) {
         var serviceResult = new ServiceResult<Boolean>();
+        Optional<Integer> errorCode = Optional.empty();
 
         try {
             var user = m_userRepository.findById(userId);
 
-            if (user.isEmpty())
+            if (user.isEmpty()) {
+                errorCode = Optional.of(ErrorCodes.USER_NOT_FOUND.getCode());
                 throw new Exception("User not found");
+            }
 
             user.get().setDeleted(true);
             user.get().setActive(false);
@@ -139,11 +167,12 @@ public class UserService implements IUserService {
 
             serviceResult.setData(true);
             serviceResult.setResponseStatus(ResponseStatus.OK);
-            serviceResult.setMessage("");
         } catch (Throwable ex) {
-            serviceResult.setData(false);
-            serviceResult.setMessage(ex.getMessage());
+            if (errorCode.isEmpty())
+                errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
+
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
+            serviceResult.setErrorModel(new ErrorModel(errorCode, "Exception@RemoveUser" + ex.getMessage()));
         }
 
         return serviceResult;
@@ -175,7 +204,6 @@ public class UserService implements IUserService {
             serviceResult.setResponseStatus(ResponseStatus.OK);
         } catch (Throwable ex) {
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
-            serviceResult.setMessage(ex.getMessage());
         }
 
         return serviceResult;
@@ -184,19 +212,24 @@ public class UserService implements IUserService {
     @Override
     public ServiceResult<UserViewModel> getUserByUsername(String username) {
         var serviceResult = new ServiceResult<UserViewModel>();
+        Optional<Integer> errorCode = Optional.empty();
 
         try {
             var user = m_userRepository.findByUsername(username);
 
-            if (user.isEmpty())
+            if (user.isEmpty()) {
+                errorCode = Optional.of(ErrorCodes.USER_NOT_FOUND.getCode());
                 throw new Exception("User not found");
+            }
 
             serviceResult.setData(m_mapper.userToUserViewModel(user.get()));
             serviceResult.setResponseStatus(ResponseStatus.OK);
         } catch (Throwable ex) {
+            if (errorCode.isEmpty())
+                errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
+
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
-            serviceResult.setMessage(ex.getMessage());
-            serviceResult.setData(new UserViewModel());
+            serviceResult.setErrorModel(new ErrorModel(errorCode, "Exception@GetUserByUsername" + ex.getMessage()));
         }
 
         return serviceResult;
@@ -205,21 +238,29 @@ public class UserService implements IUserService {
     @Override
     public ServiceResult<UserViewModel> login(String username, String password) {
         var serviceResult = new ServiceResult<UserViewModel>();
+        Optional<Integer> errorCode = Optional.empty();
 
         try {
             var user = m_userRepository.findByUsername(username);
 
-            if (user.isEmpty())
+            if (user.isEmpty()) {
+                errorCode = Optional.of(ErrorCodes.USER_NOT_FOUND.getCode());
                 throw new Exception("User not found");
+            }
 
-            if (!m_passwordEncoder.matches(password, user.get().getPassword()))
+            if (!m_passwordEncoder.matches(password, user.get().getPassword())) {
+                errorCode = Optional.of(ErrorCodes.WRONG_PASSWORD.getCode());
                 throw new Exception("Password is incorrect");
+            }
 
             serviceResult.setData(m_mapper.userToUserViewModel(user.get()));
             serviceResult.setResponseStatus(ResponseStatus.OK);
         } catch (Throwable ex) {
-            serviceResult.setMessage(ex.getMessage() + " Exception@login");
+            if (errorCode.isEmpty())
+                errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
+
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
+            serviceResult.setErrorModel(new ErrorModel(errorCode, "Exception@login" + ex.getMessage()));
         }
 
         return serviceResult;

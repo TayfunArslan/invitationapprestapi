@@ -32,12 +32,12 @@ public class AuthController {
         var user = m_userService.login(loginRequestModel.getUsername(), loginRequestModel.getPassword());
 
         if(user.getResponseStatus() == ResponseStatus.FAIL)
-            return ResponseEntity.badRequest().body(user.getMessage());
+            return ResponseEntity.badRequest().body(user.getErrorModel());
 
         var jwt = m_jwtUtils.generateJwtToken(loginRequestModel.getUsername());
 
         return ResponseEntity.ok(new JwtResponseModel(jwt,
-                (long) user.getData().getId(),
+                user.getData().getId(),
                 user.getData().getUsername(),
                 user.getData().getEmail()));
     }
@@ -47,7 +47,7 @@ public class AuthController {
         var serviceResult = m_userService.addUser(userViewModel);
 
         if(serviceResult.getResponseStatus() == ResponseStatus.FAIL)
-            return ResponseEntity.badRequest().body(serviceResult.getMessage());
+            return ResponseEntity.badRequest().body(serviceResult.getErrorModel());
 
         return ResponseEntity.ok(serviceResult.getData());
     }

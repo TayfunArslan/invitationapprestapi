@@ -8,5 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IOrganizationRepository extends JpaRepository<Organization, Long> {
-    Optional<User> findUserById(long id);
+    //    Optional<User> findUserById(long id);
+    List<Organization> findOrganizationsByCreatedUserId(long createdUser_id);
+
+    Boolean existsByCode(String code);
 }

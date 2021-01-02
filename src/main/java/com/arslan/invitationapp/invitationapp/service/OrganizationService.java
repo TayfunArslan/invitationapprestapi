@@ -7,12 +7,16 @@ import com.arslan.invitationapp.invitationapp.enums.ResponseStatus;
 import com.arslan.invitationapp.invitationapp.mapper.IMapper;
 import com.arslan.invitationapp.invitationapp.service.Interface.IOrganizationService;
 import com.arslan.invitationapp.invitationapp.viewmodel.OrganizationViewModel;
+import com.arslan.invitationapp.invitationapp.enums.ErrorCodes;
+import com.arslan.invitationapp.invitationapp.viewmodel.serviceResult.ErrorModel;
+import com.arslan.invitationapp.invitationapp.viewmodel.serviceResult.ServiceResult;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,20 +41,20 @@ public class OrganizationService implements IOrganizationService {
 
     public ServiceResult<List<OrganizationViewModel>> getMyOrganizations(long currentUserId) {
         var serviceResult = new ServiceResult<List<OrganizationViewModel>>();
+        Optional<Integer> errorCode;
 
         try {
             var organizations =
-                    m_organizationRepository
-                            .findAll()
-                            .stream()
-                            .filter(o -> o.getCreatedUser().getId() == currentUserId)
-                            .collect(Collectors.toList());
+                    new ArrayList<>(m_organizationRepository
+                            .findOrganizationsByCreatedUserId(currentUserId));
 
             serviceResult.setData(organizations.stream().map(m_mapper::organizationToOrganizationViewModel).collect(Collectors.toList()));
             serviceResult.setResponseStatus(ResponseStatus.OK);
         } catch (Throwable ex) {
+            errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
+
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
-            serviceResult.setMessage(ex.getMessage() + " Exception@getMyOrganization");
+            serviceResult.setErrorModel(new ErrorModel(errorCode, "Exception@GetMyOrganizations " + ex.getMessage()));
         }
 
         return serviceResult;
@@ -60,36 +64,53 @@ public class OrganizationService implements IOrganizationService {
     @Transactional
     public ServiceResult<OrganizationViewModel> addOrganization(OrganizationViewModel organizationViewModel,
                                                                 long userId) {
-        //Organizasyon atandığında roller de atanmalı. Oluşturan kişi
         var serviceResult = new ServiceResult<OrganizationViewModel>();
+        Optional<Integer> errorCode = Optional.empty();
 
         try {
+            var exists = m_organizationRepository.existsByCode(organizationViewModel.getCode());
+
+            if (exists) {
+                errorCode = Optional.of(ErrorCodes.ORGANIZATION_EXISTS.getCode());
+                throw new Exception("Organization already exists");
+            }
+
             organizationViewModel.setCreatedDatetime(LocalDateTime.now());
             organizationViewModel.setActive(true);
             organizationViewModel.setDeleted(false);
-            organizationViewModel.setCreatedUserId(userId);
 
-            var organization =
-                    m_organizationRepository.save(m_mapper.organizationViewModelToOrganization(organizationViewModel));
+            var user = m_userRepository.findById(userId);
+
+            if (user.isEmpty()) {
+                errorCode = Optional.of(ErrorCodes.USER_NOT_FOUND.getCode());
+                throw new Exception("User not found");
+            }
+
+            organizationViewModel.setCreatedUserId(user.get().getId());
+
+            var organization = m_mapper.organizationViewModelToOrganization(organizationViewModel);
+
+            m_organizationRepository.save(organization);
 
             var userRole = new UserRole();
 
-            Role role = null;
-            var optRole = m_roleRepository.findByName("admin");
+            var roleName = com.arslan.invitationapp.invitationapp.enums.Role.ADMIN.name();
+            var role = m_roleRepository.findByName(roleName);
 
-            if(optRole.isEmpty()) {
-                role = new Role();
-                role.setName("admin");
-                role.setActive(true);
-                role.setDeleted(false);
-                role.setCreatedDatetime(LocalDateTime.now());
+            if (role.isEmpty()) {
+                var adminRole = new Role();
+                adminRole.setName(roleName);
+                adminRole.setActive(true);
+                adminRole.setDeleted(false);
+                adminRole.setCreatedDatetime(LocalDateTime.now());
 
-                m_roleRepository.save(role);
-            } else
-                role = optRole.get();
+                m_roleRepository.save(adminRole);
+
+                role = Optional.of(adminRole);
+            }
 
             userRole.setOrganization(organization);
-            userRole.setRole(role);
+            userRole.setRole(role.get());
             userRole.setUser(organization.getCreatedUser());
             userRole.setCreatedDatetime(LocalDateTime.now());
             userRole.setActive(true);
@@ -100,9 +121,11 @@ public class OrganizationService implements IOrganizationService {
             serviceResult.setData(m_mapper.organizationToOrganizationViewModel(organization));
             serviceResult.setResponseStatus(ResponseStatus.OK);
         } catch (Throwable ex) {
-            serviceResult.setData(new OrganizationViewModel());
+            if (errorCode.isEmpty())
+                errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
+
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
-            serviceResult.setMessage("Exception@createOrganization " + ex.getMessage());
+            serviceResult.setErrorModel(new ErrorModel(errorCode, "Exception@addOrganization" + ex.getMessage()));
         }
 
         return serviceResult;
@@ -110,15 +133,23 @@ public class OrganizationService implements IOrganizationService {
 
     @Transactional
     @Override
-    public ServiceResult<Boolean> removeOrganizationById(long organizationId) {
+    public ServiceResult<Boolean> removeOrganizationById(long organizationId, long currentUserId) {
         var serviceResult = new ServiceResult<Boolean>();
+        Optional<Integer> errorCode = Optional.empty();
 
         //When the organization is deleted, we must delete the guests as well.
         try {
             var organization = m_organizationRepository.findById(organizationId);
 
-            if (organization.isEmpty())
+            if (organization.isEmpty()) {
+                errorCode = Optional.of(ErrorCodes.ORGANIZATION_NOT_FOUND.getCode());
                 throw new Exception("Organization not found");
+            }
+
+            if (organization.get().getCreatedUser().getId() != currentUserId) {
+                errorCode = Optional.of(ErrorCodes.NO_PERMISSION.getCode());
+                throw new Exception("No Permission!!");
+            }
 
             organization.get().setActive(false);
             organization.get().setDeleted(true);
@@ -130,12 +161,16 @@ public class OrganizationService implements IOrganizationService {
                 g.setActive(false);
             });
 
+            m_organizationRepository.save(organization.get());
+
             serviceResult.setData(true);
             serviceResult.setResponseStatus(ResponseStatus.OK);
         } catch (Throwable ex) {
-            serviceResult.setData(false);
+            if (errorCode.isEmpty())
+                errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
+
             serviceResult.setResponseStatus(ResponseStatus.FAIL);
-            serviceResult.setMessage(ex.getMessage());
+            serviceResult.setErrorModel(new ErrorModel(errorCode, "Exception@removeOrganizationById" + ex.getMessage()));
         }
 
         return serviceResult;

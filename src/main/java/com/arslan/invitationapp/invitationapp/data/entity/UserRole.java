@@ -1,40 +1,21 @@
 package com.arslan.invitationapp.invitationapp.data.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "User_Roles")
+@Getter
+@Setter
 public class UserRole extends BaseEntity{
-    @OneToOne
+    @ManyToOne(optional = false)
     private User user;
 
-    @OneToOne
+    @ManyToOne(optional = false)
     private Role role;
 
     @OneToOne
     private Organization organization;
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public Organization getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
-    }
 }

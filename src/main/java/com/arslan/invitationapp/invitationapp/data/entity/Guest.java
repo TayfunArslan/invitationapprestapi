@@ -1,9 +1,14 @@
 package com.arslan.invitationapp.invitationapp.data.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 
 @Entity
 @Table(name = "Guests")
+@Getter
+@Setter
 public class Guest extends BaseEntity{
     @Column(name = "name", nullable = false)
     private String name;
@@ -20,67 +25,17 @@ public class Guest extends BaseEntity{
     @Column(name = "will_come")
     private boolean willCome;
 
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "email")
+    private String email;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "inviter_id", nullable = false)
-    private User user;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public boolean isCalled() {
-        return isCalled;
-    }
-
-    public void setCalled(boolean called) {
-        isCalled = called;
-    }
-
-    public boolean isMailSent() {
-        return isMailSent;
-    }
-
-    public void setMailSent(boolean mailSent) {
-        isMailSent = mailSent;
-    }
-
-    public boolean isWillCome() {
-        return willCome;
-    }
-
-    public void setWillCome(boolean willCome) {
-        this.willCome = willCome;
-    }
-
-    public Organization getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
+    private User inviter;
 }
