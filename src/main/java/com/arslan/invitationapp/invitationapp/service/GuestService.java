@@ -80,7 +80,7 @@ public class GuestService implements IGuestService {
             if (errorCode.isEmpty())
                 errorCode = Optional.of(ErrorCodes.UNKNOWN_ERROR.getCode());
 
-            serviceResult.setData(new GuestViewModel());
+            serviceResult.setResponseStatus(ResponseStatus.FAIL);
             serviceResult.setErrorModel(new ErrorModel(errorCode,
                     "Exception@addGuestToOrganization " + ex.getMessage()));
         }

@@ -132,15 +132,16 @@ public class Mapper implements IMapper {
             return null;
 
         //Good looking but slow.
-        return new OrganizationViewModel() {{
-            setDeleted(organization.isActive());
-            setActive(organization.isActive());
-            setCreatedDatetime(organization.getCreatedDatetime());
-            setCreatedUserId(organization.getCreatedUser().getId());
-            setCode(organization.getCode());
-            setId(organization.getId());
-            setName(organization.getName());
-        }};
+        var organizationViewModel = new OrganizationViewModel();
+        organizationViewModel.setDeleted(organization.isDeleted());
+        organizationViewModel.setActive(organization.isActive());
+        organizationViewModel.setCreatedDatetime(organization.getCreatedDatetime());
+        organizationViewModel.setCreatedUserId(organization.getCreatedUser().getId());
+        organizationViewModel.setCode(organization.getCode());
+        organizationViewModel.setId(organization.getId());
+        organizationViewModel.setName(organization.getName());
+
+        return organizationViewModel;
     }
 
     public OrganizationCoOwnerViewModel organizationCoOwnerToOrganizationCoOwnerViewModel(OrganizationCoOwner organizationCoOwner) {

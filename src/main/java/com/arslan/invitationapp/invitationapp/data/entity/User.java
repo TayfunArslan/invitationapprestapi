@@ -2,6 +2,7 @@ package com.arslan.invitationapp.invitationapp.data.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.util.List;
@@ -30,8 +31,10 @@ public class User extends BaseEntity {
     private String phone;
 
     @OneToMany(mappedBy = "inviter", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Where(clause = "is_deleted = false")
     private List<Guest> guests;
 
     @OneToMany(mappedBy = "createdUser", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Where(clause = "is_deleted = false")
     private List<Organization> organizations;
 }
