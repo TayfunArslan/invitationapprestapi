@@ -44,9 +44,7 @@ public class OrganizationService implements IOrganizationService {
         Optional<Integer> errorCode;
 
         try {
-            var organizations =
-                    new ArrayList<>(m_organizationRepository
-                            .findOrganizationsByCreatedUserId(currentUserId));
+            var organizations = m_organizationRepository.findOrganizationsByCreatedUserId(currentUserId);
 
             serviceResult.setData(organizations.stream().map(m_mapper::organizationToOrganizationViewModel).collect(Collectors.toList()));
             serviceResult.setResponseStatus(ResponseStatus.OK);
